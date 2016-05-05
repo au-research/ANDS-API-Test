@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource xmlns="http://datacite.org/schema/kernel-3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd">
+    <identifier identifierType="DOI">10.5072/00/56661486C5285</identifier>
+    <publisher>ANDS</publisher>
+    <publicationYear>2015</publicationYear>
+    <titles>
+        <title>ANDS Developer Website</title>
+    </titles>
+    <creators>
+        <creator>
+            <creatorName>Minh Duc Nguyen</creatorName>
+        </creator>
+    </creators>
+</resource>

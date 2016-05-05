@@ -1,0 +1,10 @@
+base_url=https://test.ands.org.au/
+service_url=https://test.ands.org.au/apps/mydois/
+app_id=
+shared_secret=
+auth_header=
+test_url1=
+test_url2=
+test_doi1=
+test_doi2=
+test_doi1_fail=DOESNOTEXISTDOI
