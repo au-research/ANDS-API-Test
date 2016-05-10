@@ -5,7 +5,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -13,8 +18,7 @@ import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 
-// TODO rename to ActivitiesAPITest
-public class GrantsAPITest {
+public class ActivitiesAPITest {
 
     private static Properties props;
 
@@ -49,7 +53,7 @@ public class GrantsAPITest {
         given().queryParam("q", "fish")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.totalFound", greaterThanOrEqualTo(410))
+            .body("data.totalFound", greaterThanOrEqualTo(100))
         ;
     }
 
@@ -67,7 +71,7 @@ public class GrantsAPITest {
         given().queryParam("type", testType)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.status",
+            .body("data.recordData.type",
                 everyItem(
                     equalTo(testType)
                 )
@@ -112,7 +116,11 @@ public class GrantsAPITest {
             .body("data.numFound", equalTo(1))
             .body("data.recordData.size()", equalTo(1))
             .body("data.recordData.size()", greaterThanOrEqualTo(1))
-            .body("data.recordData[0].identifier", everyItem(containsString(testIdentifier)))
+            .body("data.recordData[0].identifier",
+                everyItem(
+                    containsString(testIdentifier)
+                )
+            )
         ;
     }
 
@@ -131,6 +139,7 @@ public class GrantsAPITest {
             response.path("data.recordData.titles");
 
         for (ArrayList<String> titles : allTitles) {
+            System.out.println(titles.toString());
             Assert.assertThat(
                 titles.toString().toLowerCase(),
                 anyOf(
@@ -165,7 +174,15 @@ public class GrantsAPITest {
 
     @Test
     public void testParamDescription() {
-        // TODO; fix description and test description
+        final String testDescription = "unique biology";
+        given().queryParam("institution", testDescription)
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.recordData.description",
+                everyItem(
+                    containsString(testDescription)
+                )
+            );
     }
 
     @Test
@@ -180,14 +197,13 @@ public class GrantsAPITest {
                         containsString(testInstitution)
                     )
                 )
-            )
-        ;
+            );
     }
 
     @Test
     public void testParamFunder() {
         final String testFunder = "Australian Research Council";
-        Response response = given().queryParam("funder", testFunder)
+        Response response = given().queryParam("funder", '"'+testFunder+'"')
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .extract().response();
@@ -197,8 +213,8 @@ public class GrantsAPITest {
 
         for (ArrayList<String> items : allItems) {
             Assert.assertThat(
-                items.toString(),
-                containsString(testFunder)
+                items.toString().toLowerCase(),
+                containsString(testFunder.toLowerCase())
             );
         }
     }
@@ -207,7 +223,8 @@ public class GrantsAPITest {
     public void testParamPrincipalInvestigator() {
         final String testPrincipalInvestigator = "Jacob George";
         Response response =
-            given().queryParam("principalInvestigator", testPrincipalInvestigator)
+            given()
+                .queryParam("principalInvestigator", testPrincipalInvestigator)
                 .when().get(props.getProperty("grant_api_url"))
                 .then().statusCode(200)
                 .extract().response();
@@ -227,7 +244,8 @@ public class GrantsAPITest {
     public void testParamPrincipalResearcher() {
         final String testResearcher = "Jacob George";
         Response response =
-            given().queryParam("researcher", testResearcher)
+            given()
+                .queryParam("researcher", testResearcher)
                 .when().get(props.getProperty("grant_api_url"))
                 .then().statusCode(200)
                 .extract().response();
@@ -246,7 +264,8 @@ public class GrantsAPITest {
     @Test
     public void testParamFundingScheme() {
         final String testFundingScheme = "NHMRC Project Grants";
-        given().queryParam("fundingScheme", testFundingScheme)
+        given()
+            .queryParam("fundingScheme", testFundingScheme)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .body("data.recordData.fundingScheme",
@@ -257,36 +276,106 @@ public class GrantsAPITest {
     }
 
     @Test
-    public void testParamAddedSince() {
+    public void testParamAddedSince() throws ParseException {
         // TODO check and implement addedSince
-        final String testAddedSince = "20151128";
-        given().queryParam("addedSince", testAddedSince)
+        final String testAddedSince = "20151208";
+        Response response = given()
+            .queryParam("addedSince", testAddedSince)
             .when().get(props.getProperty("grant_api_url"))
-            .then().statusCode(200)
-            .body("data.recordData.dateTimeCreated",
-                everyItem(
-                    containsString(testAddedSince)
-                )
-            );
+            .then().statusCode(200).extract().response();
+
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
+
+        Date start = format.parse(testAddedSince);
+
+        ArrayList<String> allCreatedWhen =
+            response.path("data.recordData.dateTimeCreated");
+
+        // assert that the return date is after the start date
+        for (String date : allCreatedWhen) {
+            Date compare = returnFormat.parse(date);
+            Assert.assertTrue(compare.compareTo(start) >= 0);
+        }
+
     }
 
     @Test
-    public void testParamModifiedSince() {
-        // TODO check and implement modifiedSince
-        final String testModifiedSince = "20151128";
-        given().queryParam("addedSince", testModifiedSince)
+    public void testParamModifiedSince() throws ParseException {
+        // TODO check and implement addedSince
+        final String testModifiedSince = "20151208";
+        Response response = given()
+            .queryParam("modifiedSince", testModifiedSince)
             .when().get(props.getProperty("grant_api_url"))
-            .then().statusCode(200)
-            .body("data.recordData.dateTimeModified",
-                everyItem(
-                    containsString(testModifiedSince)
-                )
-            );
+            .then().statusCode(200).extract().response();
+
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
+
+        Date start = format.parse(testModifiedSince);
+
+        ArrayList<String> allModifiedWhen =
+            response.path("data.recordData.dateTimeModified");
+
+        // assert that the return date is after the start date
+        for (String date : allModifiedWhen) {
+            Date compare = returnFormat.parse(date);
+            Assert.assertTrue(compare.compareTo(start) >= 0);
+        }
     }
 
-    // TODO: combination test, test different params together
+    @Test
+    public void testCombination() {
+        Response response = given()
+            .queryParam("description", "unique")
+            .queryParam("type", "grant")
+            .queryParam("title", "caves climate")
+            .queryParam("subject", "Earth Sciences")
+            .queryParam("funder", "Australian Research Council")
+            .queryParam("fl", "title")
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+                .body("data.recordData.description", everyItem(containsString("unique")))
+                .body("data.recordData.type", everyItem(equalTo("grant")))
+            .extract().response()
+        ;
 
+        //funders
+        ArrayList<ArrayList<String>> allFunders =
+            response.path("data.recordData.funder");
 
+        for (ArrayList<String> funders : allFunders) {
+            Assert.assertThat(
+                funders.toString(),
+                containsString("Australian Research Council")
+            );
+        }
 
+        ArrayList<ArrayList<String>> allSubjects =
+            response.path("data.recordData.subjects");
 
+        for (ArrayList<String> subjects : allSubjects) {
+            Assert.assertThat(
+                subjects.toString().toLowerCase(),
+                anyOf(
+                    containsString("earth"),
+                    containsString("science")
+                )
+            );
+        }
+
+        ArrayList<ArrayList<String>> allTitles =
+            response.path("data.recordData.titles");
+
+        for (ArrayList<String> titles : allTitles) {
+            Assert.assertThat(
+                titles.toString().toLowerCase(),
+                anyOf(
+                    containsString("cave"),
+                    containsString("climate"),
+                    containsString("climat")
+                )
+            );
+        }
+    }
 }
