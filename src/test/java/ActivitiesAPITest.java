@@ -265,7 +265,7 @@ public class ActivitiesAPITest {
     public void testParamFundingScheme() {
         final String testFundingScheme = "NHMRC Project Grants";
         given()
-            .queryParam("fundingScheme", testFundingScheme)
+            .queryParam("fundingScheme", "\"" + testFundingScheme + "\"")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .body("data.recordData.fundingScheme",
