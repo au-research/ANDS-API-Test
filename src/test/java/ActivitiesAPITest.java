@@ -284,7 +284,7 @@ public class ActivitiesAPITest {
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200).extract().response();
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        DateFormat format =new SimpleDateFormat("YYYYMMDD", Locale.ENGLISH);
         DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
 
         Date start = format.parse(testAddedSince);
@@ -303,13 +303,13 @@ public class ActivitiesAPITest {
     @Test
     public void testParamModifiedSince() throws ParseException {
         // TODO check and implement addedSince
-        final String testModifiedSince = "20151208";
+        final String testModifiedSince = "20151208T00:00:00Z";
         Response response = given()
             .queryParam("modifiedSince", testModifiedSince)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200).extract().response();
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        DateFormat format = new SimpleDateFormat("YYYYMMDD", Locale.ENGLISH);
         DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
 
         Date start = format.parse(testModifiedSince);
