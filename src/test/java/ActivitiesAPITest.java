@@ -24,21 +24,22 @@ public class ActivitiesAPITest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-
         APIProperties localProperties = new APIProperties();
         props = localProperties.getProp();
-
-        System.out.println("Getting and verifying configuration");
-        System.out.println("Testing...");
-
         RestAssured.useRelaxedHTTPSValidation();
     }
 
+    /**
+     * api/activities
+     */
     @Test
     public void getBaseUrl() {
         when().get(props.getProperty("grant_api_url")).then().statusCode(200);
     }
 
+    /**
+     * api/activities
+     */
     @Test
     public void getDefaultResponse() {
         when().get(props.getProperty("grant_api_url"))
@@ -48,6 +49,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?q=fish
+     */
     @Test
     public void testSearch() {
         given().queryParam("q", "fish")
@@ -57,6 +61,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?q=fish
+     */
     @Test
     public void testParamQuery() {
         given().queryParam("q", "fish")
@@ -65,6 +72,9 @@ public class ActivitiesAPITest {
             .body("data.totalFound", greaterThanOrEqualTo(100));
     }
 
+    /**
+     * api/activities/?type=grant
+     */
     @Test
     public void testParamType() {
         final String testType = "grant";
@@ -79,6 +89,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?status=active
+     */
     @Test
     public void testParamStatus() {
         final String testStatus = "active";
@@ -93,6 +106,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?purl=http://purl.org/au-research/grants/arc/LP0776938
+     */
     @Test
     public void testParamPurl() {
         final String testPurl = "http://purl.org/au-research/grants/arc/LP0776938";
@@ -106,6 +122,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?purl=LP0776938
+     */
     @Test
     public void testParamIdentifier() {
         final String testIdentifier = "LP0776938";
@@ -124,6 +143,9 @@ public class ActivitiesAPITest {
         ;
     }
 
+    /**
+     * api/activities/?title=cancer clustering
+     */
     @Test
     public void testParamTitle() {
         final String testString = "cancer clustering";
@@ -139,7 +161,6 @@ public class ActivitiesAPITest {
             response.path("data.recordData.titles");
 
         for (ArrayList<String> titles : allTitles) {
-            System.out.println(titles.toString());
             Assert.assertThat(
                 titles.toString().toLowerCase(),
                 anyOf(
@@ -150,6 +171,9 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/?subject=intelligent agents
+     */
     @Test
     public void testParamSubject() {
         Response response = given()
@@ -172,10 +196,13 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/?description=unique biology
+     */
     @Test
     public void testParamDescription() {
         final String testDescription = "unique biology";
-        given().queryParam("institution", testDescription)
+        given().queryParam("description", testDescription)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .body("data.recordData.description",
@@ -185,6 +212,9 @@ public class ActivitiesAPITest {
             );
     }
 
+    /**
+     * api/activities/?institution=University of Sydney
+     */
     @Test
     public void testParamInstitution() {
         final String testInstitution = "University of Sydney";
@@ -200,6 +230,9 @@ public class ActivitiesAPITest {
             );
     }
 
+    /**
+     * api/activities/?funder="Australian Research Council"
+     */
     @Test
     public void testParamFunder() {
         final String testFunder = "Australian Research Council";
@@ -219,6 +252,9 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/?principalInvestigator=Jacob George
+     */
     @Test
     public void testParamPrincipalInvestigator() {
         final String testPrincipalInvestigator = "Jacob George";
@@ -240,8 +276,11 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/?researcher=Jacob George
+     */
     @Test
-    public void testParamPrincipalResearcher() {
+    public void testParamResearcher() {
         final String testResearcher = "Jacob George";
         Response response =
             given()
@@ -261,6 +300,9 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/?fundingScheme="NHMRC Project Grants"
+     */
     @Test
     public void testParamFundingScheme() {
         final String testFundingScheme = "NHMRC Project Grants";
@@ -275,16 +317,19 @@ public class ActivitiesAPITest {
             );
     }
 
+    /**
+     * api/activities/?addedSince=2015-11-28T13:15:30Z
+     * @throws ParseException
+     */
     @Test
     public void testParamAddedSince() throws ParseException {
-        // TODO check and implement addedSince
-        final String testAddedSince = "20151208";
+        final String testAddedSince = "2015-11-28T13:15:30Z";
         Response response = given()
             .queryParam("addedSince", testAddedSince)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200).extract().response();
 
-        DateFormat format =new SimpleDateFormat("YYYYMMDD", Locale.ENGLISH);
+        DateFormat format =new SimpleDateFormat("YYYY-MM-DD", Locale.ENGLISH);
         DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
 
         Date start = format.parse(testAddedSince);
@@ -300,16 +345,19 @@ public class ActivitiesAPITest {
 
     }
 
+    /**
+     * api/activities/?modifiedSince=2015-11-28T13:15:30Z
+     * @throws ParseException
+     */
     @Test
     public void testParamModifiedSince() throws ParseException {
-        // TODO check and implement addedSince
-        final String testModifiedSince = "20151208T00:00:00Z";
+        final String testModifiedSince = "2015-11-28T13:15:30Z";
         Response response = given()
             .queryParam("modifiedSince", testModifiedSince)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200).extract().response();
 
-        DateFormat format = new SimpleDateFormat("YYYYMMDD", Locale.ENGLISH);
+        DateFormat format = new SimpleDateFormat("YYYY-MM-DD", Locale.ENGLISH);
         DateFormat returnFormat = new SimpleDateFormat("Y", Locale.ENGLISH);
 
         Date start = format.parse(testModifiedSince);
@@ -324,6 +372,14 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * api/activities/
+     * ?description=unique
+     * &type=grant
+     * &title=caves climate
+     * &subject=Earth Sciences
+     * &funder=Australian Research Council
+     */
     @Test
     public void testCombination() {
         Response response = given()
@@ -340,7 +396,7 @@ public class ActivitiesAPITest {
             .extract().response()
         ;
 
-        //funders
+        // funders
         ArrayList<ArrayList<String>> allFunders =
             response.path("data.recordData.funder");
 
@@ -351,6 +407,7 @@ public class ActivitiesAPITest {
             );
         }
 
+        // subjects
         ArrayList<ArrayList<String>> allSubjects =
             response.path("data.recordData.subjects");
 
@@ -364,6 +421,7 @@ public class ActivitiesAPITest {
             );
         }
 
+        // titles
         ArrayList<ArrayList<String>> allTitles =
             response.path("data.recordData.titles");
 
