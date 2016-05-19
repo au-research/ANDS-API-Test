@@ -57,7 +57,7 @@ public class ActivitiesAPITest {
         given().queryParam("q", "fish")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.totalFound", greaterThanOrEqualTo(100))
+            .body("data.numFound", greaterThanOrEqualTo(100))
         ;
     }
 
@@ -69,7 +69,7 @@ public class ActivitiesAPITest {
         given().queryParam("q", "fish")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.totalFound", greaterThanOrEqualTo(100));
+            .body("data.numFound", greaterThanOrEqualTo(100));
     }
 
     /**
@@ -81,7 +81,7 @@ public class ActivitiesAPITest {
         given().queryParam("type", testType)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.type",
+            .body("data.records.type",
                 everyItem(
                     equalTo(testType)
                 )
@@ -98,7 +98,7 @@ public class ActivitiesAPITest {
         given().queryParam("status", testStatus)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.status",
+            .body("data.records.status",
                 everyItem(
                     equalTo(testStatus)
                 )
@@ -115,10 +115,9 @@ public class ActivitiesAPITest {
         given().queryParam("purl", testPurl)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.totalFound", equalTo(1))
             .body("data.numFound", equalTo(1))
-            .body("data.recordData.size()", equalTo(1))
-            .body("data.recordData[0].purl", equalTo(testPurl))
+            .body("data.records.size()", equalTo(1))
+            .body("data.records[0].purl", equalTo(testPurl))
         ;
     }
 
@@ -131,11 +130,9 @@ public class ActivitiesAPITest {
         given().queryParam("purl", testIdentifier)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.totalFound", equalTo(1))
             .body("data.numFound", equalTo(1))
-            .body("data.recordData.size()", equalTo(1))
-            .body("data.recordData.size()", greaterThanOrEqualTo(1))
-            .body("data.recordData[0].identifier",
+            .body("data.records.size()", equalTo(1))
+            .body("data.records[0].identifiers",
                 everyItem(
                     containsString(testIdentifier)
                 )
@@ -144,21 +141,21 @@ public class ActivitiesAPITest {
     }
 
     /**
-     * api/activities/?title=cancer clustering
+     * api/activities/?title=cancer clustering&flags=titles
      */
     @Test
     public void testParamTitle() {
         final String testString = "cancer clustering";
         Response response = given()
             .queryParam("title", testString)
-            .queryParam("fl", "title")
+            .queryParam("flags", "titles")
             .queryParam("rows", 15)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .extract().response();
 
         ArrayList<ArrayList<String>> allTitles =
-            response.path("data.recordData.titles");
+            response.path("data.records.titles");
 
         for (ArrayList<String> titles : allTitles) {
             Assert.assertThat(
@@ -183,7 +180,7 @@ public class ActivitiesAPITest {
             .extract().response();
 
         ArrayList<ArrayList<String>> allSubjects =
-            response.path("data.recordData.subjects");
+            response.path("data.records.subjects");
 
         for (ArrayList<String> subjects : allSubjects) {
             Assert.assertThat(
@@ -205,7 +202,7 @@ public class ActivitiesAPITest {
         given().queryParam("description", testDescription)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.description",
+            .body("data.records.description",
                 everyItem(
                     containsString(testDescription)
                 )
@@ -221,7 +218,7 @@ public class ActivitiesAPITest {
         given().queryParam("institution", testInstitution)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.institutions",
+            .body("data.records.institutions",
                 everyItem(
                     everyItem(
                         containsString(testInstitution)
@@ -242,7 +239,7 @@ public class ActivitiesAPITest {
             .extract().response();
 
         ArrayList<ArrayList<String>> allItems =
-            response.path("data.recordData.funder");
+            response.path("data.records.funder");
 
         for (ArrayList<String> items : allItems) {
             Assert.assertThat(
@@ -266,7 +263,7 @@ public class ActivitiesAPITest {
                 .extract().response();
 
         ArrayList<ArrayList<String>> allItems =
-            response.path("data.recordData.principalInvestigator");
+            response.path("data.records.principalInvestigator");
 
         for (ArrayList<String> items : allItems) {
             Assert.assertThat(
@@ -290,7 +287,7 @@ public class ActivitiesAPITest {
                 .extract().response();
 
         ArrayList<ArrayList<String>> allItems =
-            response.path("data.recordData.researchers");
+            response.path("data.records.researchers");
 
         for (ArrayList<String> items : allItems) {
             Assert.assertThat(
@@ -310,7 +307,7 @@ public class ActivitiesAPITest {
             .queryParam("fundingScheme", "\"" + testFundingScheme + "\"")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.recordData.fundingScheme",
+            .body("data.records.fundingScheme",
                 everyItem(
                     containsString(testFundingScheme)
                 )
@@ -335,7 +332,7 @@ public class ActivitiesAPITest {
         Date start = format.parse(testAddedSince);
 
         ArrayList<String> allCreatedWhen =
-            response.path("data.recordData.dateTimeCreated");
+            response.path("data.records.dateTimeCreated");
 
         // assert that the return date is after the start date
         for (String date : allCreatedWhen) {
@@ -363,7 +360,7 @@ public class ActivitiesAPITest {
         Date start = format.parse(testModifiedSince);
 
         ArrayList<String> allModifiedWhen =
-            response.path("data.recordData.dateTimeModified");
+            response.path("data.records.dateTimeModified");
 
         // assert that the return date is after the start date
         for (String date : allModifiedWhen) {
@@ -379,6 +376,7 @@ public class ActivitiesAPITest {
      * &title=caves climate
      * &subject=Earth Sciences
      * &funder=Australian Research Council
+     * &flags=titles
      */
     @Test
     public void testCombination() {
@@ -388,17 +386,17 @@ public class ActivitiesAPITest {
             .queryParam("title", "caves climate")
             .queryParam("subject", "Earth Sciences")
             .queryParam("funder", "Australian Research Council")
-            .queryParam("fl", "title")
+            .queryParam("flags", "titles")
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-                .body("data.recordData.description", everyItem(containsString("unique")))
-                .body("data.recordData.type", everyItem(equalTo("grant")))
+                .body("data.records.description", everyItem(containsString("unique")))
+                .body("data.records.type", everyItem(equalTo("grant")))
             .extract().response()
         ;
 
         // funders
         ArrayList<ArrayList<String>> allFunders =
-            response.path("data.recordData.funder");
+            response.path("data.records.funder");
 
         for (ArrayList<String> funders : allFunders) {
             Assert.assertThat(
@@ -409,7 +407,7 @@ public class ActivitiesAPITest {
 
         // subjects
         ArrayList<ArrayList<String>> allSubjects =
-            response.path("data.recordData.subjects");
+            response.path("data.records.subjects");
 
         for (ArrayList<String> subjects : allSubjects) {
             Assert.assertThat(
@@ -423,7 +421,7 @@ public class ActivitiesAPITest {
 
         // titles
         ArrayList<ArrayList<String>> allTitles =
-            response.path("data.recordData.titles");
+            response.path("data.records.titles");
 
         for (ArrayList<String> titles : allTitles) {
             Assert.assertThat(
