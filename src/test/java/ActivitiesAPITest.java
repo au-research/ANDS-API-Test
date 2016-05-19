@@ -8,10 +8,7 @@ import org.junit.Test;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -199,7 +196,7 @@ public class ActivitiesAPITest {
     @Test
     public void testParamDescription() {
         final String testDescription = "unique biology";
-        given().queryParam("description", testDescription)
+        given().queryParam("description", '"'+testDescription+'"')
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .body("data.records.description",
@@ -433,5 +430,67 @@ public class ActivitiesAPITest {
                 )
             );
         }
+    }
+
+
+    /**
+     * activities/?identifier=chorizo risotto
+     * @throws Exception
+     */
+    @Test
+    public void testChorizoRisottoIdentifier() throws Exception {
+        final String testIdentifier = "chorizo risotto";
+        Response response = given().queryParam("identifier", testIdentifier)
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.numFound", greaterThanOrEqualTo(1))
+            .extract().response();
+
+        // identifiers
+        ArrayList<ArrayList<String>> allIdentifiers =
+            response.path("data.records.identifiers");
+
+        for (ArrayList<String> identifiers : allIdentifiers) {
+            Assert.assertThat(
+                identifiers.toString().toLowerCase(),
+                anyOf(
+                    containsString("chorizo"),
+                    containsString("risotto")
+                )
+            );
+        }
+    }
+
+    @Test
+    public void testExactQParamMatching() throws Exception {
+
+        final String q = "chorizo risotto";
+        Response response = given()
+            .queryParam("q", '"'+q+'"')
+            .queryParam("flags", "titles")
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.numFound", greaterThanOrEqualTo(1))
+            .extract().response();
+
+        // identifiers
+        List allRecords = response.path("data.records");
+
+        for (Object record : allRecords) {
+            Assert.assertThat(
+                record.toString().toLowerCase(),
+                containsString("chorizo risotto")
+            );
+        }
+    }
+
+    @Test
+    public void testPURLinIdentifier() throws Exception {
+        given()
+            .queryParam("identifier", "http://AUT.org/au-research/grants/arc/LP100100422AUTx.Grant")
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.numFound", greaterThanOrEqualTo(1))
+            .extract().response();
     }
 }
