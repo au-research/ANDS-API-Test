@@ -461,6 +461,10 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * activities/?q="chorizo risotto"
+     * @throws Exception
+     */
     @Test
     public void testExactQParamMatching() throws Exception {
 
@@ -484,6 +488,10 @@ public class ActivitiesAPITest {
         }
     }
 
+    /**
+     * activities/?identifiers=http://AUT.org/au-research/grants/arc/LP100100422AUTx.Grant
+     * @throws Exception
+     */
     @Test
     public void testPURLinIdentifier() throws Exception {
         given()
