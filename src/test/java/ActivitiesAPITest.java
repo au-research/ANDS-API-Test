@@ -499,6 +499,33 @@ public class ActivitiesAPITest {
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .body("data.numFound", greaterThanOrEqualTo(1))
+        ;
+    }
+
+    /**
+     * activities/?offset=0
+     * activities/?offset=5
+     * @throws Exception
+     */
+    @Test
+    public void testOffset() throws Exception {
+        Response response = given()
+            .queryParam("offset", 0)
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.offset", equalTo(0))
             .extract().response();
+
+        // store pointer for searching
+        String pointer = response.path("data.records[5].id");
+
+        // make sure that by moving 5 ahead, the first one is the pointer
+        given()
+            .queryParam("offset", 5)
+            .when().get(props.getProperty("grant_api_url"))
+            .then().statusCode(200)
+            .body("data.offset", equalTo(5))
+            .body("data.records[0].id", equalTo(pointer))
+        ;
     }
 }
