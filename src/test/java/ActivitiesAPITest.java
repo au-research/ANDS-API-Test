@@ -288,10 +288,19 @@ public class ActivitiesAPITest {
 
         for (ArrayList<String> items : allItems) {
             Assert.assertThat(
-                items.toString(),
-                containsString(testResearcher)
+                items.toString().toLowerCase(),
+                anyOf(
+                    containsString("george"),
+                    containsString("jacob")
+                )
             );
         }
+
+        //make sure the first one matches Jacob George perfectly
+        Assert.assertThat(
+            allItems.get(0).toString(),
+            containsString(testResearcher)
+        );
     }
 
     /**
