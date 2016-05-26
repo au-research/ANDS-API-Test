@@ -212,16 +212,20 @@ public class ActivitiesAPITest {
     @Test
     public void testParamInstitution() {
         final String testInstitution = "University of Sydney";
-        given().queryParam("institution", testInstitution)
+        Response response = given().queryParam("institution", testInstitution)
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
-            .body("data.records.institutions",
-                everyItem(
-                    everyItem(
-                        containsString(testInstitution)
-                    )
-                )
+            .extract().response();
+
+        ArrayList<ArrayList<String>> allItems =
+            response.path("data.records.institutions");
+
+        for (ArrayList<String> items : allItems) {
+            Assert.assertThat(
+                items.toString().toLowerCase(),
+                containsString(testInstitution.toLowerCase())
             );
+        }
     }
 
     /**
