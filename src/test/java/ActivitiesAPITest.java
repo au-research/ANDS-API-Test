@@ -212,7 +212,7 @@ public class ActivitiesAPITest {
     @Test
     public void testParamInstitution() {
         final String testInstitution = "University of Sydney";
-        Response response = given().queryParam("institution", testInstitution)
+        Response response = given().queryParam("institution", '"'+testInstitution+'"')
             .when().get(props.getProperty("grant_api_url"))
             .then().statusCode(200)
             .extract().response();
